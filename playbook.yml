@@ -43,7 +43,6 @@
         privatekey_path: "tmp/{{ acme_domain }}.key"
         common_name: "{{ acme_domain }}"
         subject_alt_name: "DNS:www.{{ acme_domain }},DNS:{{ acme_domain }}"
-        mode: 0600
 
     - name: Check if previous certificate exists
       stat:
