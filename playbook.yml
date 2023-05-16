@@ -1,0 +1,33 @@
+---
+- name: Let's encrypt Ansible ACME example
+  hosts: localhost
+
+  tasks:
+    - name: Generate private key
+      community.crypto.openssl_privatekey:
+        path: tmp/sample.com.key
+        type: RSA
+        size: 2048
+        mode: 0600
+
+    - name: Generate certificate signing request (CSR)
+      openssl_csr:
+        path: tmp/sample.com.csr
+        privatekey_path: tmp/sample.com.key
+        common_name: www.sample.com
+        subject_alt_name: "DNS:www.sample.com,DNS:sample.com"
+        mode: 0600
+
+    - name: Create a challenge
+      community.crypto.acme_certificate:
+        account_key_src: tmp/sample.com.key
+        account_email: jan@tomasek.cz
+        csr: tmp/sample.com.csr
+        dest: tmp/sample.com.crt
+        acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+        acme_version: 2
+        terms_agreed: true
+      register: sample_com_challenge
+
+    - name: Show challenge
+      debug: var=sample_com_challenge
