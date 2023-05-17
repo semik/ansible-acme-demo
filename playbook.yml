@@ -18,6 +18,11 @@
         acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
         when: acme_directory is not defined
 
+    - name: Set acme_version
+      ansible.builtin.set_fact:
+        acme_version: 2
+        when: acme_version is not defined
+
     - name: Set acme_force
       ansible.builtin.set_fact:
         acme_force: false
@@ -54,7 +59,7 @@
         account_key_src: "tmp/acme_account_key"
         certificate: "tmp/{{ acme_domain }}.crt"
         acme_directory: "{{ acme_directory }}"
-        acme_version: 2
+        acme_version: "{{ acme_version }}"
       when: prev_cert.stat.exists
 
     - name: Create a challenge
@@ -64,7 +69,7 @@
         csr: "tmp/{{ acme_domain }}.csr"
         dest: "tmp/{{ acme_domain }}}.crt"
         acme_directory: "{{ acme_directory }}"
-        acme_version: 2
+        acme_version: "{{ acme_version }}"
         terms_agreed: true
         force: "{{ acme_force }}"
       register: acme_challenge
@@ -88,7 +93,7 @@
         chain_dest: "tmp/{{ acme_domain }}-intermediate.crt"
         data: "{{ acme_challenge }}"
         acme_directory: "{{ acme_directory }}"
-        acme_version: 2
+        acme_version: "{{ acme_version }}"
         terms_agreed: true
         force: "{{ acme_force }}"
 
