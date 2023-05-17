@@ -3,30 +3,20 @@
   hosts: localhost
 
   tasks:
-    - name: Set acme_domain
-      ansible.builtin.set_fact:
-        acme_domain:  "example.com"
-        when: acme_domain is not defined
-
     - name: Set acme_web_dir
       ansible.builtin.set_fact:
         acme_web_dir: "/var/www/html"
         when: acme_web_dir is not defined
 
-    - name: Set acme_directory
-      ansible.builtin.set_fact:
-        acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
-        when: acme_directory is not defined
-
-    - name: Set acme_version
-      ansible.builtin.set_fact:
-        acme_version: 2
-        when: acme_version is not defined
-
     - name: Set acme_force
       ansible.builtin.set_fact:
         acme_force: false
         when: acme_force is not defined
+
+    - name: Set acme_register_account
+      ansible.builtin.set_fact:
+        acme_register_account: false
+        when: acme_register_account is not defined
 
     - name: Generate private key for ACME account
       community.crypto.openssl_privatekey:
@@ -34,6 +24,34 @@
         type: RSA
         size: 2048
         mode: 0600
+
+    - debug: var=acme_external_account_binding
+
+    - name: Register ACME Account with external binding
+      community.crypto.acme_account:
+        account_key_src: "tmp/acme_account_key"
+        acme_directory: "{{ acme_directory }}"
+        acme_version: "{{ acme_version }}"
+        state: present
+        terms_agreed: true
+        contact:
+          - "mailto:{{ acme_account_email }}"
+        external_account_binding:
+          "{{ lookup('file', acme_external_account_binding_file) | from_yaml }}"
+      register: acme_account
+      when: acme_register_account and acme_external_account_binding_file is defined
+
+    - name: Register ACME Account without external binding
+      community.crypto.acme_account:
+        account_key_src: "tmp/acme_account_key"
+        acme_directory: "{{ acme_directory }}"
+        acme_version: "{{ acme_version }}"
+        state: present
+        terms_agreed: true
+        contact:
+          - "mailto:{{ acme_account_email }}"
+      register: acme_account
+      when: acme_register_account and acme_external_account_binding_file is not defined
 
     - name: Generate private key for server
       community.crypto.openssl_privatekey:
@@ -60,7 +78,7 @@
         certificate: "tmp/{{ acme_domain }}.crt"
         acme_directory: "{{ acme_directory }}"
         acme_version: "{{ acme_version }}"
-      when: prev_cert.stat.exists
+      when: prev_cert.stat.exists and acme_revoke
 
     - name: Create a challenge
       community.crypto.acme_certificate:
@@ -72,10 +90,11 @@
         acme_version: "{{ acme_version }}"
         terms_agreed: true
         force: "{{ acme_force }}"
+        modify_account: false
       register: acme_challenge
 
-    # - name: Show challenge
-    #   debug: var=acme_challenge
+    - name: Show challenge
+      debug: var=acme_challenge
 
     - name: Copy HTTP-01 challenge data
       copy:
@@ -96,6 +115,7 @@
         acme_version: "{{ acme_version }}"
         terms_agreed: true
         force: "{{ acme_force }}"
+        modify_account: false
 
     - name: Clean HTTP-01 challenge data
       file:

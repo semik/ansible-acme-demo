@@ -1,0 +1,6 @@
+acme_directory: "https://acme.zerossl.com/v2/DV90"
+acme_version: 2
+acme_revoke: false
+acme_register_account: true
+acme_account_email: jan@tomasek.cz
+acme_external_account_binding_file: "vars/zero-ssl.private"

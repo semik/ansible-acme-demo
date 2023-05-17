@@ -1,0 +1,5 @@
+acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
+acme_version: 2
+acme_revoke: false
+acme_register_account: true
+acme_account_email: jan@tomasek.cz
