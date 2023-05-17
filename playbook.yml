@@ -16,7 +16,7 @@
     - name: Set acme_directory
       ansible.builtin.set_fact:
         acme_directory: "https://acme-staging-v02.api.letsencrypt.org/directory"
-        when: acme_dirctory is not defined
+        when: acme_directory is not defined
 
     - name: Set acme_force
       ansible.builtin.set_fact:
