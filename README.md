@@ -25,6 +25,19 @@ alg: HS256
 ```
 and put there `key id` and `key` from developer section on ZeroSSL.
 
+## Example with CZERTAINLY
+```
+ansible-playbook -e acme_domain=semik.doma.3key.test -e @vars/czertainly.yml -e acme_account_email=email@example.com -e 'acme_method=dns-01' playbook.yml
+```
+
+For DNS method you have to provide DNS server capable of dynamic updates, put needed parameters into var/czertainly.private file:
+```
+server: 123.123.123.123
+key_algorithm: "hmac-sha512"
+key_name: "key"
+key_secret: "secret"
+```
+
 ## Note
 
 To complicated? You can use [acme.sh](https://github.com/acmesh-official/acme.sh/tree/master) it is written in shell and has much broader support for [free SSL certificate priders](https://github.com/acmesh-official/acme.sh/tree/master#supported-ca).
