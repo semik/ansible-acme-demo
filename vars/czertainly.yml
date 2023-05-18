@@ -1,0 +1,5 @@
+acme_directory: "https://czertainly.local/api/v1/protocols/acme/ACME_WebServers/directory"
+acme_version: 2
+acme_revoke: false
+acme_register_account: true
+bind: "{{ lookup('file', 'vars/czertainly.private') | from_yaml }}"

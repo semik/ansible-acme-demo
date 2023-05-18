@@ -3,4 +3,4 @@ tmp/acme_account_key
 tmp/*crt
 tmp/*csr
 tmp/*key
-vars/zero-ssl.private
+vars/*.private
