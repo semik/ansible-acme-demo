@@ -24,3 +24,7 @@ key:
 alg: HS256
 ```
 and put there `key id` and `key` from developer section on ZeroSSL.
+
+## Note
+
+To complicated? You can use [acme.sh](https://github.com/acmesh-official/acme.sh/tree/master) it is written in shell and has much broader support for [free SSL certificate priders](https://github.com/acmesh-official/acme.sh/tree/master#supported-ca).
