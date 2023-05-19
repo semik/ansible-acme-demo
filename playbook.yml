@@ -64,15 +64,15 @@
         mode: 0600
 
     - name: Generate certificate signing request (CSR)
-      openssl_csr:
+      community.crypto.openssl_csr:
         path: "tmp/{{ acme_domain }}.csr"
         privatekey_path: "tmp/{{ acme_domain }}.key"
         common_name: "{{ acme_domain }}"
-        #subject_alt_name: "DNS:www.{{ acme_domain }},DNS:{{ acme_domain }}"
-        subject_alt_name: "DNS:{{ acme_domain }}"
+        subject_alt_name: "DNS:www.{{ acme_domain }},DNS:{{ acme_domain }}"
+        #subject_alt_name: "DNS:{{ acme_domain }}"
 
     - name: Check if previous certificate exists
-      stat:
+      ansible.builtin.stat:
         path: "tmp/{{ acme_domain }}.crt"
       register: prev_cert
 
@@ -99,10 +99,10 @@
       register: acme_challenge
 
     - name: Show challenge
-      debug: var=acme_challenge
+      ansible.builtin.debug: var=acme_challenge
 
     - name: Copy http-01 challenge data
-      copy:
+      ansible.builtin.copy:
         dest: "{{ acme_web_dir }}/{{ item.value['http-01']['resource'] }}"
         content: "{{ item.value['http-01']['resource_value'] }}"
       with_dict:
