@@ -1,22 +1,17 @@
----
+
 - name: Let's encrypt Ansible ACME example
   hosts: localhost
 
   tasks:
-    - name: Set acme_web_dir
+    - name: Set vars
       ansible.builtin.set_fact:
+        acme_directory: "https://czertainly.local/api/v1/protocols/acme/ACME_WebServers/directory"
+        acme_version: 2
+        acme_register_account: true
         acme_web_dir: "/var/www/html"
-        when: acme_web_dir is not defined
-
-    - name: Set acme_force
-      ansible.builtin.set_fact:
         acme_force: false
-        when: acme_force is not defined
-
-    - name: Set acme_register_account
-      ansible.builtin.set_fact:
-        acme_register_account: false
-        when: acme_register_account is not defined
+        acme_account_email: "email@example.com"
+        bind: "{{ lookup('file', 'vars/czertainly.private') | from_yaml }}"
 
     - name: Set default ACME method
       ansible.builtin.set_fact:
@@ -30,20 +25,6 @@
         size: 2048
         mode: 0600
 
-    - name: Register ACME Account with external binding
-      community.crypto.acme_account:
-        account_key_src: "tmp/acme_account_key"
-        acme_directory: "{{ acme_directory }}"
-        acme_version: "{{ acme_version }}"
-        state: present
-        terms_agreed: true
-        contact:
-          - "mailto:{{ acme_account_email }}"
-        external_account_binding:
-          "{{ lookup('file', acme_external_account_binding_file) | from_yaml }}"
-      register: acme_account
-      when: acme_register_account and acme_external_account_binding_file is defined
-
     - name: Register ACME Account without external binding
       community.crypto.acme_account:
         account_key_src: "tmp/acme_account_key"
@@ -54,7 +35,7 @@
         contact:
           - "mailto:{{ acme_account_email }}"
       register: acme_account
-      when: acme_register_account and acme_external_account_binding_file is not defined
+      when: acme_register_account
 
     - name: Generate private key for server
       community.crypto.openssl_privatekey:
@@ -68,21 +49,7 @@
         path: "tmp/{{ acme_domain }}.csr"
         privatekey_path: "tmp/{{ acme_domain }}.key"
         common_name: "{{ acme_domain }}"
-        #subject_alt_name: "DNS:www.{{ acme_domain }},DNS:{{ acme_domain }}"
         subject_alt_name: "DNS:{{ acme_domain }}"
-
-    - name: Check if previous certificate exists
-      ansible.builtin.stat:
-        path: "tmp/{{ acme_domain }}.crt"
-      register: prev_cert
-
-    - name: Revoke previous certificate
-      community.crypto.acme_certificate_revoke:
-        account_key_src: "tmp/acme_account_key"
-        certificate: "tmp/{{ acme_domain }}.crt"
-        acme_directory: "{{ acme_directory }}"
-        acme_version: "{{ acme_version }}"
-      when: prev_cert.stat.exists and acme_revoke
 
     - name: Create a challenge
       community.crypto.acme_certificate:
@@ -137,6 +104,7 @@
         force: "{{ acme_force }}"
         modify_account: false
         challenge: "{{ acme_method }}"
+      async: 120
 
     - name: Clean http-01 challenge data from drive
       ansible.builtin.file:
