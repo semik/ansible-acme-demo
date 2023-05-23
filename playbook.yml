@@ -123,7 +123,7 @@
         - "{{ acme_challenge['challenge_data'] }}"
       when: acme_method == 'dns-01'
 
-    - name: Let the challenge be validated and retrieve the cert and intermediate certificate
+    - name: Let the challenge(s) be validated and retrieve the cert and intermediate certificate
       community.crypto.acme_certificate:
         account_key_src: "tmp/acme_account_key"
         csr: "tmp/{{ acme_domain }}.csr"

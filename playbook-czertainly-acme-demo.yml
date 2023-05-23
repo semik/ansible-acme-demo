@@ -5,7 +5,8 @@
   tasks:
     - name: Set vars
       ansible.builtin.set_fact:
-        acme_directory: "https://czertainly.local/api/v1/protocols/acme/ACME_WebServers/directory"
+#        acme_directory: "https://czertainly.local/api/v1/protocols/acme/ACME_WebServers/directory"
+        acme_directory: "https://develop.czertainly.online/api/v1/protocols/acme/test/directory"
         acme_version: 2
         acme_register_account: true
         acme_web_dir: "/var/www/html"
@@ -49,7 +50,7 @@
         path: "tmp/{{ acme_domain }}.csr"
         privatekey_path: "tmp/{{ acme_domain }}.key"
         common_name: "{{ acme_domain }}"
-        subject_alt_name: "DNS:{{ acme_domain }}"
+        subject_alt_name: "DNS:{{ acme_domain }},DNS:www.{{ acme_domain }}"
 
     - name: Create a challenge
       community.crypto.acme_certificate:
@@ -90,7 +91,7 @@
         - "{{ acme_challenge['challenge_data'] }}"
       when: acme_method == 'dns-01'
 
-    - name: Let the challenge be validated and retrieve the cert and intermediate certificate
+    - name: Let the challenge(s) be validated and retrieve the cert and intermediate certificate
       community.crypto.acme_certificate:
         account_key_src: "tmp/acme_account_key"
         csr: "tmp/{{ acme_domain }}.csr"
